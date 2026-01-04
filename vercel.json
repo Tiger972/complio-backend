@@ -1,10 +1,20 @@
 {
-  "functions": {
-    "api/generate_license.py": {
-      "runtime": "python3.11"
-    },
-    "api/validate_license.py": {
-      "runtime": "python3.11"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/api/generate-license",
+      "dest": "api/generate_license.py"
+    },
+    {
+      "src": "/api/validate-license",
+      "dest": "api/validate_license.py",
+      "methods": ["POST"]
+    }
+  ]
 }
