@@ -1,3 +1,0 @@
-"""
-Complio Backend - API Endpoints
-"""
