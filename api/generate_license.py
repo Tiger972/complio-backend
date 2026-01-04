@@ -155,7 +155,8 @@ class handler(BaseHTTPRequestHandler):
                 print(f"📋 Subscription ID: {subscription_id}")
 
                 # Extract tier from metadata (set in Stripe checkout)
-                tier = session.get('metadata', {}).get('tier', 'STARTER')
+                # Default to EARLY_ACCESS tier (unlocks CLI scanning)
+                tier = session.get('metadata', {}).get('tier', 'EARLY_ACCESS')
                 print(f"🏷️  Tier from metadata: {tier}")
 
                 print(f"🔑 Generating license key...")
