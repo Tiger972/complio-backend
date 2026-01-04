@@ -113,23 +113,50 @@ class handler(BaseHTTPRequestHandler):
             if event['type'] == 'checkout.session.completed':
                 print(f"🎯 Processing checkout.session.completed event")
                 session = event['data']['object']
-                print(f"📧 Session data: customer_email={session.get('customer_email')}, customer={session.get('customer')}")
 
-                # Extract customer information
-                customer_email = session.get('customer_email')
+                # Extract customer email from Stripe session
+                # Stripe can put email in different locations depending on checkout configuration
+                customer_email = None
+
+                # Try customer_details first (most common in Checkout Sessions)
+                if session.get('customer_details'):
+                    customer_email = session['customer_details'].get('email')
+                    if customer_email:
+                        print(f"📧 Email found in customer_details: {customer_email}")
+
+                # Fallback to customer_email field (legacy/alternative location)
+                if not customer_email:
+                    customer_email = session.get('customer_email')
+                    if customer_email:
+                        print(f"📧 Email found in customer_email field: {customer_email}")
+
+                # If still no email, check if we have a customer ID
                 customer_id = session.get('customer')
                 subscription_id = session.get('subscription')
 
-                # Extract tier from metadata (set in Stripe checkout)
-                tier = session.get('metadata', {}).get('tier', 'STARTER')
-                print(f"🏷️  Tier: {tier}")
+                if not customer_email and customer_id:
+                    error_msg = f"No customer email found in session. Customer ID: {customer_id}. Please ensure email collection is enabled in Stripe Checkout."
+                    print(f"❌ {error_msg}")
+                    print(f"Session keys available: {list(session.keys())}")
+                    print(f"Customer details: {session.get('customer_details')}")
+                    self._send_error(400, error_msg)
+                    return
 
                 if not customer_email:
                     error_msg = "Missing customer email in session"
                     print(f"❌ {error_msg}")
+                    print(f"Session keys available: {list(session.keys())}")
                     print(f"Session object: {session}")
                     self._send_error(400, error_msg)
                     return
+
+                print(f"✅ Customer email confirmed: {customer_email}")
+                print(f"👤 Customer ID: {customer_id}")
+                print(f"📋 Subscription ID: {subscription_id}")
+
+                # Extract tier from metadata (set in Stripe checkout)
+                tier = session.get('metadata', {}).get('tier', 'STARTER')
+                print(f"🏷️  Tier from metadata: {tier}")
 
                 print(f"🔑 Generating license key...")
                 # Generate license key
