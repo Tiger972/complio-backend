@@ -177,3 +177,76 @@ class Database:
             # Don't fail validation if logging fails - just log the error
             print(f"Warning: Validation logging failed: {str(e)}")
             return {}
+
+    def get_license_by_subscription(self, subscription_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get license by Stripe subscription ID.
+
+        This method is used to find licenses when processing Stripe webhook
+        events related to subscriptions (payment failures, cancellations, etc.).
+
+        Args:
+            subscription_id: Stripe subscription ID (sub_xxxxx)
+
+        Returns:
+            Dict containing license data if found, None otherwise
+
+        Raises:
+            Exception: If database query fails
+        """
+        try:
+            response = self.client.table('licenses').select('*').eq(
+                'stripe_subscription_id', subscription_id
+            ).execute()
+
+            if response.data and len(response.data) > 0:
+                return response.data[0]
+            else:
+                return None
+
+        except Exception as e:
+            raise Exception(f"Database query failed: {str(e)}")
+
+    def update_license_status(self, license_key: str, new_status: str) -> Dict[str, Any]:
+        """
+        Update license status.
+
+        This method is used to change license status based on subscription
+        events (e.g., ACTIVE → SUSPENDED on payment failure, SUSPENDED → CANCELLED
+        on subscription deletion).
+
+        Valid statuses: ACTIVE, SUSPENDED, CANCELLED
+
+        Args:
+            license_key: License key to update
+            new_status: New status (ACTIVE, SUSPENDED, or CANCELLED)
+
+        Returns:
+            Dict containing the updated license record
+
+        Raises:
+            Exception: If database update fails or invalid status provided
+        """
+        # Validate status
+        valid_statuses = ['ACTIVE', 'SUSPENDED', 'CANCELLED']
+        if new_status not in valid_statuses:
+            raise ValueError(f"Invalid status: {new_status}. Must be one of {valid_statuses}")
+
+        try:
+            update_data = {
+                'status': new_status,
+                'last_validated_at': datetime.utcnow().isoformat()
+            }
+
+            response = self.client.table('licenses').update(update_data).eq(
+                'license_key', license_key
+            ).execute()
+
+            if response.data:
+                print(f"✅ License {license_key} status updated to {new_status}")
+                return response.data[0]
+            else:
+                raise Exception("Failed to update license status: No data returned")
+
+        except Exception as e:
+            raise Exception(f"Failed to update license status: {str(e)}")

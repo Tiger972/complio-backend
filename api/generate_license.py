@@ -223,12 +223,136 @@ class handler(BaseHTTPRequestHandler):
                     'tier': tier
                 })
 
+            # Handle payment failure
+            elif event['type'] == 'invoice.payment_failed':
+                invoice = event['data']['object']
+                subscription_id = invoice.get('subscription')
+                customer_email = invoice.get('customer_email')
+                attempt_count = invoice.get('attempt_count', 0)
+
+                print(f"⚠️  Payment failed for subscription: {subscription_id}")
+                print(f"📧 Customer: {customer_email}")
+                print(f"🔄 Attempt count: {attempt_count}")
+
+                try:
+                    db = Database()
+                    license_data = db.get_license_by_subscription(subscription_id)
+
+                    if license_data:
+                        license_key = license_data['license_key']
+                        current_status = license_data.get('status')
+
+                        # Only suspend if currently active
+                        if current_status == 'ACTIVE':
+                            db.update_license_status(license_key, 'SUSPENDED')
+                            print(f"⚠️  License suspended: {license_key}")
+                            print(f"📋 Reason: Payment failed (attempt {attempt_count})")
+                        else:
+                            print(f"ℹ️  License already {current_status}: {license_key}")
+
+                        # TODO: Send warning email to customer about payment failure
+                    else:
+                        print(f"⚠️  No license found for subscription: {subscription_id}")
+
+                except Exception as e:
+                    error_details = traceback.format_exc()
+                    print(f"❌ Error handling payment failure:")
+                    print(error_details)
+
+                # Always acknowledge receipt to Stripe
+                self._send_success({'received': True})
+
+            # Handle subscription deletion/cancellation
+            elif event['type'] == 'customer.subscription.deleted':
+                subscription = event['data']['object']
+                subscription_id = subscription['id']
+                customer_id = subscription.get('customer')
+                cancel_reason = subscription.get('cancellation_details', {}).get('reason', 'unknown')
+
+                print(f"❌ Subscription canceled: {subscription_id}")
+                print(f"👤 Customer: {customer_id}")
+                print(f"📋 Cancellation reason: {cancel_reason}")
+
+                try:
+                    db = Database()
+                    license_data = db.get_license_by_subscription(subscription_id)
+
+                    if license_data:
+                        license_key = license_data['license_key']
+                        db.update_license_status(license_key, 'CANCELLED')
+
+                        print(f"❌ License cancelled: {license_key}")
+                        print(f"📋 Reason: Subscription deleted ({cancel_reason})")
+
+                        # TODO: Send cancellation confirmation email
+                    else:
+                        print(f"⚠️  No license found for subscription: {subscription_id}")
+
+                except Exception as e:
+                    error_details = traceback.format_exc()
+                    print(f"❌ Error handling subscription deletion:")
+                    print(error_details)
+
+                # Always acknowledge receipt to Stripe
+                self._send_success({'received': True})
+
+            # Handle subscription updates (status changes)
+            elif event['type'] == 'customer.subscription.updated':
+                subscription = event['data']['object']
+                subscription_id = subscription['id']
+                status = subscription['status']
+                previous_attributes = event['data'].get('previous_attributes', {})
+                previous_status = previous_attributes.get('status', 'unknown')
+
+                print(f"📋 Subscription updated: {subscription_id}")
+                print(f"📊 Status change: {previous_status} → {status}")
+
+                try:
+                    db = Database()
+                    license_data = db.get_license_by_subscription(subscription_id)
+
+                    if license_data:
+                        license_key = license_data['license_key']
+                        current_license_status = license_data['status']
+
+                        # Map Stripe subscription status to license status
+                        status_mapping = {
+                            'active': 'ACTIVE',
+                            'past_due': 'SUSPENDED',
+                            'unpaid': 'SUSPENDED',
+                            'canceled': 'CANCELLED',
+                            'incomplete_expired': 'CANCELLED',
+                            'trialing': 'ACTIVE',
+                            'incomplete': 'SUSPENDED',
+                            'paused': 'SUSPENDED'
+                        }
+
+                        new_license_status = status_mapping.get(status, current_license_status)
+
+                        # Only update if status actually changed
+                        if new_license_status != current_license_status:
+                            db.update_license_status(license_key, new_license_status)
+                            print(f"📋 License status updated: {license_key}")
+                            print(f"   {current_license_status} → {new_license_status}")
+                            print(f"   Stripe status: {status}")
+                        else:
+                            print(f"ℹ️  License status unchanged: {new_license_status}")
+                            print(f"   (Stripe status: {status})")
+                    else:
+                        print(f"⚠️  No license found for subscription: {subscription_id}")
+
+                except Exception as e:
+                    error_details = traceback.format_exc()
+                    print(f"❌ Error handling subscription update:")
+                    print(error_details)
+
+                # Always acknowledge receipt to Stripe
+                self._send_success({'received': True})
+
             else:
-                # Event type not handled
-                print(f"ℹ️  Event type '{event['type']}' received but not processed")
-                self._send_success({
-                    'message': f'Event type {event["type"]} received but not processed'
-                })
+                # Unhandled event type
+                print(f"ℹ️  Unhandled event type: {event['type']}")
+                self._send_success({'received': True})
 
         except Exception as e:
             error_details = traceback.format_exc()
