@@ -51,7 +51,7 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             # Validate license key format
-            if not license_key.startswith('COMPL-') or len(license_key) != 24:
+            if not license_key.startswith('COMPL-') or len(license_key) != 25:
                 self._send_json_response({
                     'valid': False,
                     'error': 'Invalid license key format'
