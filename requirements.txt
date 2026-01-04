@@ -1,0 +1,4 @@
+stripe==8.2.0
+supabase==2.3.4
+resend==0.8.1
+python-dotenv==1.0.0
