@@ -145,7 +145,7 @@ This license key is personal and confidential. Do not share it with others.
     try:
         # Send email via Resend
         params = {
-            "from": "Complio <licenses@complio.dev>",
+            "from": "Complio <andy.piquionne@complio.tech>",
             "to": [email],
             "subject": f"🎉 Your Complio {tier_display} License is Ready!",
             "html": html_content,
