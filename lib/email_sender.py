@@ -43,71 +43,65 @@ def send_license_email(email: str, license_key: str, tier: str) -> Dict[str, Any
     # Create HTML email template
     html_content = f"""
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Complio License Key</title>
+    <title>Votre Clé de Licence Complio</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Welcome to Complio!</h1>
-        <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 16px;">Your AWS ISO 27001 Compliance Solution</p>
+        <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Bienvenue sur Complio !</h1>
+        <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 16px;">Votre Solution de Conformité ISO 27001 pour AWS</p>
     </div>
 
     <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #333; margin-top: 0;">Your License is Ready! 🚀</h2>
+        <h2 style="color: #333; margin-top: 0;">Votre Licence est Prête ! 🚀</h2>
 
-        <p>Thank you for subscribing to Complio <strong>{tier_display}</strong>. Your license has been activated and is ready to use.</p>
+        <p>Merci d'avoir souscrit à Complio <strong>{tier_display}</strong>. Votre licence a été activée et est prête à l'emploi.</p>
 
         <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 30px 0; border-radius: 4px;">
-            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your License Key</p>
+            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Votre Clé de Licence</p>
             <code style="font-family: 'Courier New', Courier, monospace; font-size: 18px; color: #667eea; font-weight: bold; word-break: break-all;">{license_key}</code>
         </div>
 
-        <h3 style="color: #333; margin-top: 30px;">📦 Getting Started</h3>
+        <h3 style="color: #333; margin-top: 30px;">📦 Premiers Pas</h3>
 
-        <p><strong>Step 1: Install Complio CLI</strong></p>
+        <p><strong>Étape 1 : Installer Complio CLI</strong></p>
         <div style="background: #2d3748; color: #fff; padding: 15px; border-radius: 6px; margin: 10px 0;">
             <code style="font-family: 'Courier New', Courier, monospace;">pip install complio</code>
         </div>
 
-        <p><strong>Step 2: Activate Your License</strong></p>
+        <p><strong>Étape 2 : Activer Votre Licence</strong></p>
         <div style="background: #2d3748; color: #fff; padding: 15px; border-radius: 6px; margin: 10px 0;">
             <code style="font-family: 'Courier New', Courier, monospace;">complio activate --license-key {license_key}</code>
         </div>
 
-        <p><strong>Step 3: Run Your First Compliance Scan</strong></p>
+        <p><strong>Étape 3 : Lancer Votre Premier Scan de Conformité</strong></p>
         <div style="background: #2d3748; color: #fff; padding: 15px; border-radius: 6px; margin: 10px 0;">
-            <code style="font-family: 'Courier New', Courier, monospace;">complio scan --profile production</code>
+            <code style="font-family: 'Courier New', Courier, monospace;">complio scan --region eu-west-3</code>
         </div>
 
         <div style="background: #e6fffa; border-left: 4px solid #38b2ac; padding: 20px; margin: 30px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #234e52;"><strong>💡 Pro Tip:</strong> Run <code style="background: #b2f5ea; padding: 2px 6px; border-radius: 3px;">complio --help</code> to see all available commands and options.</p>
+            <p style="margin: 0; color: #234e52;"><strong>💡 Astuce :</strong> Lancez <code style="background: #b2f5ea; padding: 2px 6px; border-radius: 3px;">complio --help</code> pour voir toutes les commandes et options disponibles.</p>
         </div>
 
-        <h3 style="color: #333; margin-top: 30px;">🔐 License Information</h3>
+        <h3 style="color: #333; margin-top: 30px;">🔐 Informations de Licence</h3>
         <ul style="color: #666; line-height: 1.8;">
-            <li><strong>Plan:</strong> {tier_display}</li>
-            <li><strong>Email:</strong> {email}</li>
-            <li><strong>Status:</strong> Active</li>
+            <li><strong>Formule :</strong> {tier_display}</li>
+            <li><strong>Email :</strong> {email}</li>
+            <li><strong>Statut :</strong> Active</li>
         </ul>
 
-        <h3 style="color: #333; margin-top: 30px;">📚 Resources</h3>
+        <h3 style="color: #333; margin-top: 30px;">📚 Ressources</h3>
         <ul style="color: #666; line-height: 1.8;">
-            <li><a href="https://github.com/Tiger972/Complio" style="color: #667eea; text-decoration: none;">📖 Documentation</a></li>
-            <li><a href="https://github.com/Tiger972/Complio/issues" style="color: #667eea; text-decoration: none;">🐛 Report Issues</a></li>
-            <li><a href="mailto:support@complio.dev" style="color: #667eea; text-decoration: none;">✉️ Contact Support</a></li>
+            <li><a href="https://www.complio.tech/documentation/getting-started/introduction" style="color: #667eea; text-decoration: none;">📖 Documentation</a></li>
         </ul>
 
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
-        <p style="color: #999; font-size: 14px; margin: 0;">
-            Need help? Reply to this email or contact us at <a href="mailto:support@complio.dev" style="color: #667eea;">support@complio.dev</a>
-        </p>
-
         <p style="color: #999; font-size: 12px; margin: 20px 0 0 0;">
-            This license key is personal and confidential. Do not share it with others.
+            Cette clé de licence est personnelle et confidentielle. Ne la partagez pas avec d'autres personnes.
         </p>
     </div>
 </body>
@@ -116,30 +110,29 @@ def send_license_email(email: str, license_key: str, tier: str) -> Dict[str, Any
 
     # Plain text version for email clients that don't support HTML
     text_content = f"""
-Welcome to Complio!
+Bienvenue sur Complio !
 
-Your License Key: {license_key}
+Votre Clé de Licence : {license_key}
 
-Plan: {tier_display}
-Email: {email}
-Status: Active
+Formule : {tier_display}
+Email : {email}
+Statut : Active
 
-Getting Started:
+Premiers Pas :
 
-1. Install Complio CLI:
+1. Installer Complio CLI :
    pip install complio
 
-2. Activate Your License:
+2. Activer Votre Licence :
    complio activate --license-key {license_key}
 
-3. Run Your First Compliance Scan:
-   complio scan --profile production
+3. Lancer Votre Premier Scan de Conformité :
+   complio scan --region eu-west-3
 
-Resources:
-- Documentation: https://github.com/Tiger972/Complio
-- Support: support@complio.dev
+Ressources :
+- Documentation : https://www.complio.tech/documentation/getting-started/introduction
 
-This license key is personal and confidential. Do not share it with others.
+Cette clé de licence est personnelle et confidentielle. Ne la partagez pas avec d'autres personnes.
     """
 
     try:
@@ -147,7 +140,7 @@ This license key is personal and confidential. Do not share it with others.
         params = {
             "from": "Complio <licenses@complio.dev>",
             "to": [email],
-            "subject": f"🎉 Your Complio {tier_display} License is Ready!",
+            "subject": f"🎉 Votre Licence Complio {tier_display} est Prête !",
             "html": html_content,
             "text": text_content,
         }
